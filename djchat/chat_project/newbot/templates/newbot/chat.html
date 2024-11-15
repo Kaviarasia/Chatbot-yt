@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newbot - WhatsApp Style</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background-color: #075e54;
+            color: #ffffff;
+            padding: 10px 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chat-box {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #dcf8c6; /* Default background color */
+        }
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            max-width: 70%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .sent {
+            align-self: flex-end;
+            background-color: #25d366;
+            color: white;
+            flex-direction: row-reverse;
+        }
+        .received {
+            align-self: flex-start;
+            background-color: #ffffff;
+            color: black;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .timestamp {
+            font-size: 10px;
+            color: #777;
+            margin-left: 10px;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f0f0f0;
+            border-top: 1px solid #ccc;
+        }
+        #messageInput {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+            background: #ffffff;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+        }
+        button {
+            background: #075e54;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .emoji-picker {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .audio-btn {
+            background-color: #075e54;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+    <script>
+        // Function to generate a random color
+        function getRandomColor() {
+            const colors = ['#f0f8ff', '#ffebcd', '#faebd7', '#add8e6', '#90ee90', '#d3d3d3', '#ffb6c1', '#e0ffff'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Get the current date and time for the timestamp
+            const timestamp = new Date().toLocaleTimeString();
+
+            // Append user's message to chat
+            const chatBox = document.querySelector('.chat-box');
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'sent');
+            userMessage.innerHTML = `
+                <span>${message}</span>
+                <span class="timestamp">${timestamp}</span>
+            `;
+            chatBox.appendChild(userMessage);
+
+            // Change the background color of the chat box
+            chatBox.style.backgroundColor = getRandomColor();
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Simulate bot response
+            const response = await fetch('/newbot/response/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            });
+
+            const data = await response.json();
+
+            // Append bot's response to chat
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('message', 'received');
+            botMessage.innerHTML = `
+                <span>${data.response}</span>
+                <span class="timestamp">${timestamp}</span>
+            `;
+            chatBox.appendChild(botMessage);
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Clear input
+            messageInput.value = '';
+        }
+
+        function toggleEmojiPicker() {
+            // For simplicity, just inserting a random emoji when the button is clicked
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value += '🙂';  // Add an emoji
+        }
+
+        function recordAudio() {
+            // Placeholder for audio functionality
+            alert("Audio recording feature is not implemented yet.");
+        }
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">Newbot</div>
+        <div class="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Type your message">
+            <button onclick="sendMessage()">Send</button>
+            <span class="emoji-picker" onclick="toggleEmojiPicker()">😊</span>
+            <button class="audio-btn" onclick="recordAudio()">🎤</button>
+        </div>
+    </div>
+</body>
+</html>
